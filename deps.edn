@@ -1,15 +1,10 @@
-{:paths
- ["src/clj" "src/cljs"]
- 
- :deps
+{:deps
  {org.clojure/clojure       {:mvn/version "1.10.0-alpha4"}
   org.clojure/clojurescript {:mvn/version "1.10.238"}
   cljs-web3                 {:mvn/version "0.19.0-0-11"}
   reagent                   {:mvn/version "0.8.0"}
-  com.taoensso/timbre       {:mvn/version "4.10.0"}
   prismatic/dommy           {:mvn/version "1.1.0"}}
  
  :aliases
  {:run
-  {:main-opts ["-m" "cljs.main" "-co" "cljs.edn" "-c" "blockchain.core" "-s" "localhost:5000"]}}}
-
+  {:main-opts ["-m cljs.main -co cljs.edn -c blockchain.core -s localhost:5000"]}}}

@@ -2,5 +2,4 @@
  :output-to     "js/blockchain.js"
  :output-dir    "js/out"
  :asset-path    "js/out"
- :optimizations :advanced
- :parallel-build true}
+ :optimizations :whitespace}
