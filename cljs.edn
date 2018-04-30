@@ -1,0 +1,6 @@
+{:main          "blockchain.core"
+ :output-to     "resources/js/blockchain.js"
+ :output-dir    "resources/js/out"
+ :asset-path    "js/out"
+ :optimizations :whitespace
+ :parallel-build true}

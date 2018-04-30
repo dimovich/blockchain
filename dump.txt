@@ -1,0 +1,20 @@
+GHOST
+Parity hack
+
+
+
+
+Running migration: 1_initial_migration.js
+  Deploying Migrations...
+  ... 0x045ac478cf21c4558bb79b26b877692b8381084e1e2f845e05a570a5d55979d8
+  Migrations: 0x8d0de5549748bd67dbe47b5960ca85739b5da978
+Saving artifacts...
+Running migration: 2_voting_migration.js
+  Replacing Voting...
+  ... 0x2cd2aedeb3bcd5fa1a36295554fc360814094eb5202dfb76d09885b5ed0017d8
+  Voting: 0x63a6b245ae31aa77f6173c5300d0fde97ad17585
+Saving artifacts...
+
+
+
+    <script>blockchain.core.main();</script>
