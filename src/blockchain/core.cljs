@@ -10,12 +10,12 @@
 
 
 
-(def abi (->> (load-json "abi.json")
-              (.parse js/JSON)))
+(defonce abi (->> (load-json "abi.json")
+                  (.parse js/JSON)))
 
-(def address "0x63a6b245ae31aa77f6173c5300d0fde97ad17585")
+(defonce address "0x63a6b245ae31aa77f6173c5300d0fde97ad17585")
 
-(def web3* (atom nil))
+(defonce web3* (atom nil))
 
 
 (defn get-web3 []
@@ -27,39 +27,46 @@
 
 
 (defn init [state]
-  (let [contract (web3-eth/contract-at @web3* abi address)
-        get-vote-count (fn [props]
-                         (doseq [prop props]
-                           (.. contract -getProposalVoteCount
-                               (call prop #(swap! state assoc-in [:proposals prop] %2)))))]
+  (when-let [web3 @web3*]
+    (let [info-keys [:name :website :logo]
+          contract (web3-eth/contract-at web3 abi address)
+          get-vote-count (fn [props]
+                           (doseq [prop props]
+                             (web3-eth/contract-call
+                              contract :get-proposal-vote-count
+                              prop #(swap! state assoc-in [:proposals prop] %2))))]
     
-    (swap! state assoc :contract contract)
-    (doto contract
-      (.. -name    (call #(swap! state assoc :name %2)))
-      (.. -website (call #(swap! state assoc :website %2)))
-      (.. -logo    (call #(swap! state assoc :logo %2)))
-      (.. -getProposals (call #(let [props (js->clj %2)]
-                                 (get-vote-count props)))))))
+      (swap! state assoc :contract contract)
+
+      (doseq [k info-keys]
+        (web3-eth/contract-call
+         contract k #(swap! state assoc k %2)))
+
+      (web3-eth/contract-call contract :get-proposals
+                              #(let [props (js->clj %2)]
+                                 (get-vote-count props))))))
 
 
 
 (defn voting [state]
-  (let [{:keys [logo name website proposals contract]} @state]
-    [:div
-     [:img {:src logo}]
-     [:h1 name]
-     [:h2 website]
+  (r/with-let [to-utf8 (goog.object/get @web3* "toUtf8")]
+    (let [{:keys [logo name website proposals contract]} @state]
+      [:div
+       [:img {:src logo}]
+       [:h1 name]
    
-     [:ul
-      (doall
-       (for [[prop votes] proposals]
-         ^{:key prop}
-         [:li
-          [:em {:style {:margin "1em"}}
-           (.toString votes 10)]
+       [:ul
+        (doall
+         (for [[prop votes] proposals]
+           ^{:key prop}
+           [:li
+            [:em {:style {:margin "1em"}}
+             (.toString votes 10)]
         
-          [:button {:on-click #(.. contract (vote prop identity))}
-           (.toUtf8 @web3* prop)]]))]]))
+            [:button {:on-click #(web3-eth/contract-call
+                                  contract :vote prop identity)}
+             (to-utf8 prop)]]))]])))
+
 
 
 (defn reload []
@@ -68,7 +75,8 @@
     (r/render [voting state] (sel1 :#app))))
 
 
-;; check if web3 is present and save instance
+
+;; check if MetaMask web3 is present and save instance
 (defn checker [t]
   (let [web3 (get-web3)]
     (if (and web3 (web3-eth/default-account web3))

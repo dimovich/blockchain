@@ -1,5 +1,5 @@
 {:main          "blockchain.core"
- :output-to     "js/blockchain.js"
- :output-dir    "js/out"
+ :output-to     "resources/public/js/blockchain.js"
+ :output-dir    "resources/public/js/out"
  :asset-path    "js/out"
- :optimizations :whitespace}
+ :optimizations :advanced}
