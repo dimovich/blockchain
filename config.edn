@@ -1,2 +1,0 @@
-{:repl/repl {:port 3311}
- :adapter/httpkit {:port 5000}}

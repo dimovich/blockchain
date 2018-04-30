@@ -1,6 +1,5 @@
 (ns blockchain.core
   (:require
-   [taoensso.timbre :as timbre :refer [info]]
    [reagent.core :as r]
    [dommy.core :refer [sel1]]
    [cljs-web3.core :as web3-core]
@@ -16,7 +15,6 @@
 
 (def address "0x63a6b245ae31aa77f6173c5300d0fde97ad17585")
 
-
 (def web3* (atom nil))
 
 
@@ -27,23 +25,21 @@
       (web3-inst. (web3-core/current-provider web3)))))
 
 
-(defn init [state]
 
-  (info "init with" @web3*)
-  
-  #_(let [contract (web3-eth/contract-at @web3* abi address)
-          get-vote-count (fn [props]
-                           (doseq [prop props]
-                             (.. contract -getProposalVoteCount
-                                 (call prop #(swap! state assoc-in [:proposals prop] %2)))))]
+(defn init [state]
+  (let [contract (web3-eth/contract-at @web3* abi address)
+        get-vote-count (fn [props]
+                         (doseq [prop props]
+                           (.. contract -getProposalVoteCount
+                               (call prop #(swap! state assoc-in [:proposals prop] %2)))))]
     
-      (swap! state assoc :contract contract)
-      #_(doto contract
-          (.. -name    (call #(swap! state assoc :name %2)))
-          (.. -website (call #(swap! state assoc :website %2)))
-          (.. -logo    (call #(swap! state assoc :logo %2)))
-          (.. -getProposals (call #(let [props (js->clj %2)]
-                                     (get-vote-count props)))))))
+    (swap! state assoc :contract contract)
+    (doto contract
+      (.. -name    (call #(swap! state assoc :name %2)))
+      (.. -website (call #(swap! state assoc :website %2)))
+      (.. -logo    (call #(swap! state assoc :logo %2)))
+      (.. -getProposals (call #(let [props (js->clj %2)]
+                                 (get-vote-count props)))))))
 
 
 
@@ -66,25 +62,22 @@
            (.toUtf8 @web3* prop)]]))]]))
 
 
-
 (defn reload []
   (let [state (r/atom nil)]
     (init state)
     (r/render [voting state] (sel1 :#app))))
 
 
-
+;; check if web3 is present and save instance
 (defn checker [t]
   (let [web3 (get-web3)]
     (if (and web3 (web3-eth/default-account web3))
       (do
-        (info "got web3")
         (reset! web3* web3)
         (reload))
       (when (pos? t)
-        (info "retrying...")
-        (info web3)
         (js/setTimeout #(checker (dec t)) 300)))))
+
 
 
 (defn ^:export main []
